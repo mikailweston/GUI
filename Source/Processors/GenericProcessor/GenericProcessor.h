@@ -510,12 +510,8 @@ public:
         PARAMETER_CHANGE = 2,
         TTL = 3,
         SPIKE = 4,
-        EEG = 5,
-        CONTINUOUS = 6,
-        NETWORK = 7,
-        EYE_POSITION = 8,
-        SERIAL = 9,
-        MESSAGE = 10
+        MESSAGE = 5,
+		BINARY_MSG = 6
     };
 
     /** Variable used to orchestrate saving the ProcessorGraph. */
@@ -661,6 +657,8 @@ private:
 
     bool paramsWereLoaded;
     bool needsToSendTimestampMessage;
+
+	bool timestampSet;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GenericProcessor);
 
