@@ -102,7 +102,7 @@ void PeriStimulusTimeHistogramNode::allocateTrialCircularBuffer()
 	params.binResolutionMS = 1;
 	params.desiredSamplingRateHz = 600;
 	params.ttlSupressionTimeSec = 1.0;
-	params.ttlTrialLengthSec = 0;
+	params.ttlTrialLengthSec = 1.0;
 	params.autoAddTTLconditions = true;
 	params.buildTrialsPSTH = true;
 	params.reconstructTTL = false;
@@ -182,7 +182,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
     checkForEvents(events); 
 	
 
-	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)  {
+	if (trialCircularBuffer == nullptr && getSampleRate() > 0 && getNumInputs() > 0)  {
 		allocateTrialCircularBuffer();
 		syncInternalDataStructuresWithSpikeSorter();	
 	} else if (trialCircularBuffer != nullptr)
@@ -323,21 +323,23 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 	   const uint8* dataptr = event.getRawData();
 	   int ttl_source = dataptr[1];
 	   bool ttl_raise = dataptr[2] > 0;
-	   int channel = dataptr[3] + 1; // channel number incremented by 1
+	   int channel = dataptr[3]; // channel number
 	   int64 ttl_timestamp_hardware = timestamps[ttl_source] + samplePosition; // hardware time
 	   int64 ttl_timestamp_software = timer.getHighResolutionTicks(); // get software time
 	   //int64  ttl_timestamp_software,ttl_timestamp_hardware;
 	   //memcpy(&ttl_timestamp_software, dataptr+4, 8);
 	   //memcpy(&ttl_timestamp_hardware, dataptr+12, 8);
-	   if (ttl_raise)
-			trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software,ttl_timestamp_hardware, ttl_raise, true);
+	   
+		trialCircularBuffer->addTTLevent(channel, ttl_timestamp_software, ttl_timestamp_hardware, ttl_raise, true);
 	  
 	}
 
     if (eventType == SPIKE)
     {
         const uint8_t* dataptr = event.getRawData();
+        
         int bufferSize = event.getRawDataSize();
+
         if (bufferSize > 0)
         {
             SpikeObject newSpike;
@@ -346,6 +348,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			if (newSpike.sortedId > 0) { // drop unsorted spikes
 				trialCircularBuffer->addSpikeToSpikeBuffer(newSpike);
 			}
+
 			if (isRecording)
 			{
 				if (spikeSavingMode == 1 && newSpike.sortedId > 0)
