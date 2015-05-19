@@ -352,7 +352,7 @@ void SpikeSorterEditor::buttonEvent(Button* button)
         // std::cout << "Plus button pressed!" << std::endl;
         if (acquisitionIsActive)
         {
-            sendActionMessage("Stop acquisition before adding electrodes.");
+            CoreServices::sendStatusMessage("Stop acquisition before adding electrodes.");
             return;
         }
 
@@ -439,7 +439,8 @@ void SpikeSorterEditor::buttonEvent(Button* button)
         processor->addProbes(ProbeType,numProbes, nElectrodes,nChansPerElectrode, firstElectrodeOffset,interelectrodeDistance);
         refreshElectrodeList();
 
-        getEditorViewport()->makeEditorVisible(this, true, true);
+        CoreServices::updateSignalChain(this);
+        CoreServices::highlightEditor(this);
 
         return;
 
@@ -448,7 +449,7 @@ void SpikeSorterEditor::buttonEvent(Button* button)
     {
         if (acquisitionIsActive)
         {
-            sendActionMessage("Stop acquisition before deleting electrodes.");
+            CoreServices::sendStatusMessage("Stop acquisition before deleting electrodes.");
             return;
         }
         removeElectrode(electrodeList->getSelectedItemIndex());
@@ -657,7 +658,7 @@ void SpikeSorterEditor::setElectrodeComboBox(int direction)
         C = N;
     if (C > N)
         C = 1;
-	electrodeList->setSelectedId(C, sendNotification);
+    electrodeList->setSelectedId(C, sendNotification);
 }
 
 void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)

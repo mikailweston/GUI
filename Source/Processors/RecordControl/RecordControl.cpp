@@ -28,7 +28,7 @@
 
 RecordControl::RecordControl()
     : GenericProcessor("Record Control"),
-     triggerChannel(0), recordNode(0)
+      triggerChannel(0)
 {
 
 }
@@ -50,14 +50,14 @@ void RecordControl::setParameter(int parameterIndex, float newValue)
     {
         updateTriggerChannel((int) newValue);
     }
-	else if (parameterIndex == 1)
-	{
-		triggerType = (Types)((int)newValue - 1);
-	}
-	else if (parameterIndex == 2)
-	{
-		triggerEdge = (Edges)((int)newValue - 1);
-	}
+    else if (parameterIndex == 1)
+    {
+        triggerType = (Types)((int)newValue - 1);
+    }
+    else if (parameterIndex == 2)
+    {
+        triggerEdge = (Edges)((int)newValue - 1);
+    }
 }
 
 void RecordControl::updateTriggerChannel(int newChannel)
@@ -67,10 +67,6 @@ void RecordControl::updateTriggerChannel(int newChannel)
 
 bool RecordControl::enable()
 {
-    if (recordNode == 0)
-        recordNode = getProcessorGraph()->getRecordNode();
-
-    //recordNode->appendTrialNumber(createNewFilesOnTrigger);
 
     return true;
 }
@@ -93,27 +89,27 @@ void RecordControl::handleEvent(int eventType, MidiMessage& event, int)
 
     if (eventType == TTL && eventChannel == triggerChannel)
     {
-		int edge = triggerEdge == RISING ? 1 : 0;
+        int edge = triggerEdge == RISING ? 1 : 0;
 
         //std::cout << "Trigger!" << std::endl;
 
         const MessageManagerLock mmLock;
 
-		if (triggerType == SET)
-		{
-			if (eventId == edge)
-			{
-				getControlPanel()->setRecordState(true);
-			}
-			else
-			{
-				getControlPanel()->setRecordState(false);
-			}
-		}
-		else if (triggerType == TOGGLE && eventId == edge)
-		{
-			getControlPanel()->setRecordState(!getControlPanel()->recordButton->getToggleState());
-		}
+        if (triggerType == SET)
+        {
+            if (eventId == edge)
+            {
+                CoreServices::setRecordingStatus(true);
+            }
+            else
+            {
+                CoreServices::setRecordingStatus(false);
+            }
+        }
+        else if (triggerType == TOGGLE && eventId == edge)
+        {
+            CoreServices::setRecordingStatus(!CoreServices::getRecordingStatus());
+        }
 
 
     }
